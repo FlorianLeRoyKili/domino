@@ -24,7 +24,7 @@ from sklearn.preprocessing import label_binarize
 from sklearn.utils.validation import check_is_fitted
 from tqdm.auto import tqdm
 
-from domino.utils import convert_to_numpy, unpack_args
+from domino.utils import _check_X, convert_to_numpy, unpack_args
 
 from .abstract import Slicer
 
@@ -519,6 +519,7 @@ class DominoMixture(GaussianMixture):
     def fit_predict(self, X, y, y_hat):
         y, y_hat = self._preprocess_ys(y, y_hat)
 
+        X = _check_X(X, self.n_components, ensure_min_samples=2)
         self._check_n_features(X, reset=True)
         self._check_initial_parameters(X)
 
@@ -595,6 +596,7 @@ class DominoMixture(GaussianMixture):
         y, y_hat = self._preprocess_ys(y, y_hat)
 
         check_is_fitted(self)
+        X = _check_X(X, None, self.means_.shape[1])
         _, log_resp = self._estimate_log_prob_resp(X)
         return np.exp(log_resp)
 

@@ -8,6 +8,30 @@ import numpy as np
 from typing import List
 
 import meerkat as mk
+from sklearn.utils.validation import check_array
+
+
+def _check_X(X, n_components=None, n_features=None, ensure_min_samples=1):
+    """Check the input data X.
+    Parameters
+    ----------
+    X : array-like of shape (n_samples, n_features)
+    n_components : int
+    Returns
+    -------
+    X : array, shape (n_samples, n_features)
+    """
+    X = check_array(X, dtype=[np.float64, np.float32],
+                    ensure_min_samples=ensure_min_samples)
+    if n_components is not None and X.shape[0] < n_components:
+        raise ValueError('Expected n_samples >= n_components '
+                         'but got n_components = %d, n_samples = %d'
+                         % (n_components, X.shape[0]))
+    if n_features is not None and X.shape[1] != n_features:
+        raise ValueError("Expected the input data X have %d features, "
+                         "but got %d features"
+                         % (n_features, X.shape[1]))
+    return X
 
 
 def unpack_args(data: mk.DataPanel, *args):
@@ -41,6 +65,7 @@ def convert_to_numpy(*args):
 
     return tuple(new_args)
 
+
 def convert_to_torch(*args):
     new_args = []
     for arg in args:
@@ -48,8 +73,9 @@ def convert_to_torch(*args):
             new_args.append(torch.tensor(arg))
         else:
             new_args.append(arg)
-        
+
     return tuple(new_args)
+
 
 def nested_getattr(obj, attr, *args):
     """Get a nested property from an object.
