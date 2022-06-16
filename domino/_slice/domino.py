@@ -12,7 +12,7 @@ from scipy.special import logsumexp
 from sklearn.decomposition import PCA
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.mixture import GaussianMixture
-from sklearn.mixture._base import _check_X, check_random_state
+from sklearn.mixture._base import check_random_state
 from sklearn.mixture._gaussian_mixture import (
     _compute_precision_cholesky,
     _estimate_gaussian_covariances_diag,
@@ -274,7 +274,6 @@ class DominoSlicer(Slicer):
         if self.pca is not None:
             self.pca.fit(X=embeddings)
             embeddings = self.pca.transform(X=embeddings)
-        
 
         self.mm.fit(X=embeddings, y=targets, y_hat=pred_probs)
 
@@ -520,7 +519,6 @@ class DominoMixture(GaussianMixture):
     def fit_predict(self, X, y, y_hat):
         y, y_hat = self._preprocess_ys(y, y_hat)
 
-        X = _check_X(X, self.n_components, ensure_min_samples=2)
         self._check_n_features(X, reset=True)
         self._check_initial_parameters(X)
 
@@ -550,7 +548,8 @@ class DominoMixture(GaussianMixture):
 
                 log_prob_norm, log_resp = self._e_step(X, y, y_hat)
                 if np.isnan(log_resp).any():
-                    import pdb; pdb.set_trace()
+                    import pdb
+                    pdb.set_trace()
 
                 self._m_step(X, y, y_hat, log_resp)
                 lower_bound = self._compute_lower_bound(log_resp, log_prob_norm)
@@ -596,7 +595,6 @@ class DominoMixture(GaussianMixture):
         y, y_hat = self._preprocess_ys(y, y_hat)
 
         check_is_fitted(self)
-        X = _check_X(X, None, self.means_.shape[1])
         _, log_resp = self._estimate_log_prob_resp(X)
         return np.exp(log_resp)
 
@@ -745,8 +743,9 @@ class DominoMixture(GaussianMixture):
         """
         # add epsilon to avoid "RuntimeWarning: divide by zero encountered in log"
         if (np.dot(y_hat, self.y_hat_probs.T) + np.finfo(self.y_hat_probs.dtype).eps < 0).any():
-            import pdb; pdb.set_trace()
-        
+            import pdb
+            pdb.set_trace()
+
         return np.log(
             np.dot(y_hat, self.y_hat_probs.T) + np.finfo(self.y_hat_probs.dtype).eps
         )
